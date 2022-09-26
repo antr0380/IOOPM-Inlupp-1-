@@ -1,4 +1,5 @@
 #include <CUnit/Basic.h>
+#include "hash_table.h"
 
 int init_suite(void) {
   // Change this function if you want to do something *before* you
@@ -22,6 +23,13 @@ void test2(void) {
   CU_ASSERT_EQUAL(1 + 1, 2);
 }
 
+void test_create_destroy()        //lagts till 
+{
+   ioopm_hash_table_t *ht = ioopm_hash_table_create();
+   CU_ASSERT_PTR_NOT_NULL(ht);
+   ioopm_hash_table_destroy(ht);
+}
+
 int main() {
   // First we try to set up CUnit, and exit if we fail
   if (CU_initialize_registry() != CUE_SUCCESS)
@@ -43,6 +51,7 @@ int main() {
   if (
     (CU_add_test(my_test_suite, "A simple test", test1) == NULL) ||
     (CU_add_test(my_test_suite, "Basic arithmetics", test2) == NULL) ||
+    (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || //lagts till 
     0
   )
     {
