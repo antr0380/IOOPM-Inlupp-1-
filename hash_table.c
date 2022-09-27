@@ -17,7 +17,6 @@ struct hash_table
   entry_t *buckets[17];
 };
 
-
 ioopm_hash_table_t *ioopm_hash_table_create(void)   //type for this function is unknown 
 {
   /// Allocate space for a ioopm_hash_table_t = 17 pointers to
@@ -25,7 +24,6 @@ ioopm_hash_table_t *ioopm_hash_table_create(void)   //type for this function is 
   ioopm_hash_table_t *result = calloc(1, sizeof(ioopm_hash_table_t));
   return result;
 }
-
 
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht) 
 {
