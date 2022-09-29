@@ -1,8 +1,6 @@
 #include "hash_table.h"
 #include <stdlib.h>
 
-
-
 typedef struct entry entry_t;
 
 struct entry
@@ -30,3 +28,12 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
     free(ht);
 }
 
+char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key) //pekarsemantik eller värdesemantik?
+{
+  return NULL; //TODO
+}
+
+void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value)
+{
+  return; //TODO 
+}

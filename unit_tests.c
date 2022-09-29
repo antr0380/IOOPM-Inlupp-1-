@@ -2,32 +2,110 @@
 #include "hash_table.h"
 
 int init_suite(void) {
-  // Change this function if you want to do something *before* you
-  // run a test suite
   return 0;
 }
 
 int clean_suite(void) {
-  // Change this function if you want to do something *after* you
-  // run a test suite
   return 0;
 }
 
-// These are example test functions. You should replace them with
-// functions of your own.
-void test1(void) {
-  CU_ASSERT(42);
-}
-
-void test2(void) {
-  CU_ASSERT_EQUAL(1 + 1, 2);
-}
-
-void test_create_destroy()        //lagts till 
+void ioopm_hash_table_lookup_test() //(ioopm_hash_table_t *ht, int key) 
 {
-   ioopm_hash_table_t *ht = ioopm_hash_table_create();
-   CU_ASSERT_PTR_NOT_NULL(ht);
-   ioopm_hash_table_destroy(ht);
+  // TODO: Stub
+  //return NULL; TODO: SKA RETURNERA NULL! 
+}
+
+void test_create_destroy()        
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  CU_ASSERT_PTR_NOT_NULL(ht);
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_insert_once(ioopm_hash_table_t *ht)
+{
+  //ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 0;
+  char *value = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key));
+  ioopm_hash_table_insert(ht, key, value);
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value);
+  //ioopm_hash_table_destroy(ht);
+}
+
+void test_insert_twice(ioopm_hash_table_t *ht)          
+{
+  //ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 0;
+  char *value1 = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key));
+  ioopm_hash_table_insert(ht, key, value1);
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value1);
+
+  // FIXME måste ändra på det här om vi implementerar en länkad lista i bucket
+  char *value2 = NULL;
+  ioopm_hash_table_insert(ht, key, value2);
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value2);
+  //ioopm_hash_table_destroy(ht);
+}
+
+//TODO väntar tills vi implementerat hash table
+void test_insert_invalid(ioopm_hash_table_t *ht)
+{
+  //ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 18;                    //måste ändras när vi implementerar mod i funktionen. 
+  char *value = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
+  //FIXME vet inte vad ioopm_hash_table_lookup returnerar om key inte existerar i ht. 
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key)); 
+  ioopm_hash_table_insert(ht, key, value);
+  //ioopm_hash_table_destroy(ht);
+}
+
+void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
+{
+  //testar 1;2;3
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  test_insert_once(ht);
+  test_insert_twice(ht);
+  test_insert_invalid(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 1;1
+  ht = ioopm_hash_table_create();
+  test_insert_once(ht);
+  test_insert_once(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 2;2 
+  ht = ioopm_hash_table_create();
+  test_insert_twice(ht);
+  test_insert_twice(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 3;3
+  ht = ioopm_hash_table_create();
+  test_insert_invalid(ht);
+  test_insert_invalid(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 1;2
+  ht = ioopm_hash_table_create();
+  test_insert_once(ht);
+  test_insert_twice(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 1;3
+  ht = ioopm_hash_table_create();
+  test_insert_once(ht);
+  test_insert_invalid(ht);
+  ioopm_hash_table_destroy(ht);
+
+  //testar 2;3
+  ht = ioopm_hash_table_create();
+  test_insert_twice(ht);
+  test_insert_invalid(ht);
+  ioopm_hash_table_destroy(ht);
+  ht = NULL;               //avrefererar pointer till NULL, dangling pointer annars. 
 }
 
 int main() {
@@ -42,6 +120,12 @@ int main() {
       CU_cleanup_registry();
       return CU_get_error();
   }
+  CU_pSuite test_suite_insert = CU_add_suite("Testing insert", init_suite, clean_suite);
+  if (test_suite_insert == NULL) {
+      // If the test suite could not be added, tear down CUnit and exit
+      CU_cleanup_registry();
+      return CU_get_error();
+  }
 
   // This is where we add the test functions to our test suite.
   // For each call to CU_add_test we specify the test suite, the
@@ -49,11 +133,17 @@ int main() {
   // the test in question. If you want to add another test, just
   // copy a line below and change the information
   if (
-    (CU_add_test(my_test_suite, "A simple test", test1) == NULL) ||
-    (CU_add_test(my_test_suite, "Basic arithmetics", test2) == NULL) ||
-    (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || //lagts till 
+    (CU_add_test(my_test_suite, "Lookup hash table", ioopm_hash_table_lookup_test) == NULL) ||
+    (CU_add_test(my_test_suite, "Insert hash table", ioopm_hash_table_insert_test) == NULL) ||
+    //(CU_add_test(test_suite_insert, "Insert hash table once", test_insert_once) == NULL) ||
+    //(CU_add_test(test_suite_insert, "Insert hash table twice", test_insert_twice) == NULL) ||
+    //(CU_add_test(test_suite_insert, "Insert hash table invalid", test_insert_invalid) == NULL) ||
+    (CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
+    (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
+
+  
     0
-  )
+    )
     {
       // If adding any of the tests fails, we tear down CUnit and exit
       CU_cleanup_registry();
