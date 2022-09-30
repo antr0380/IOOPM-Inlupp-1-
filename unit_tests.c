@@ -134,11 +134,11 @@ int main() {
   // copy a line below and change the information
   if (
     (CU_add_test(my_test_suite, "Lookup hash table", ioopm_hash_table_lookup_test) == NULL) ||
-    (CU_add_test(my_test_suite, "Insert hash table", ioopm_hash_table_insert_test) == NULL) ||
+    //(CU_add_test(my_test_suite, "Insert hash table", ioopm_hash_table_insert_test) == NULL) ||
     //(CU_add_test(test_suite_insert, "Insert hash table once", test_insert_once) == NULL) ||
     //(CU_add_test(test_suite_insert, "Insert hash table twice", test_insert_twice) == NULL) ||
     //(CU_add_test(test_suite_insert, "Insert hash table invalid", test_insert_invalid) == NULL) ||
-    (CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
+    //(CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
 
   
