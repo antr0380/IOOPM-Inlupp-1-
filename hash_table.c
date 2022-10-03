@@ -44,7 +44,6 @@ ioopm_hash_table_t *ioopm_hash_table_create(void)   //type for this function is 
   return ht;
 }
 
-
 entry_t *entry_create(int key, char *value, entry_t *next)
 {
   entry_t *entry = calloc(1, sizeof(entry_t));
@@ -55,6 +54,7 @@ entry_t *entry_create(int key, char *value, entry_t *next)
 void entry_destroy(entry_t *entry)
 {
   free(entry);
+  entry = NULL;  //free pointer
 }
 
 /*1. Iterate over the buckets in the buckets array
@@ -63,7 +63,7 @@ void entry_destroy(entry_t *entry)
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht) 
 {
   int ht_size = 17; //FIXME hårdkodat bucket size 17. 
-  for(int i = 0; i < ht_size; i++) //itererar över buckets array
+  for(int i = 0; i < ht_size; i++) //itererar över buckets array, tar bort alla entries förutom sista
   {
     entry_t *entry = ht->buckets[i]; 
     while(entry->next != NULL) //itererar över entries i bucket
@@ -71,10 +71,11 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
       entry_t *entry_temp = entry; //alias eller kopia?
       entry = entry->next;
       entry_destroy(entry_temp);
-      puts("inne i loopen!");
     }
+    entry_destroy(entry); //förstör sista entry
   }
   free(ht);
+  ht = NULL; //free pointer
 }
 
 char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key) //pekarsemantik eller värdesemantik?

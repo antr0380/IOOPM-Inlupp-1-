@@ -49,6 +49,18 @@ void test_insert_twice(ioopm_hash_table_t *ht)
   //ioopm_hash_table_destroy(ht);
 }
 
+void test_lookup_empty()
+{
+   ioopm_hash_table_t *ht = ioopm_hash_table_create();
+   for (int i = 0; i < 18; ++i) /// 18 is a bit magical
+     {
+       CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, i));
+     }
+   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, -1));
+   ioopm_hash_table_destroy(ht);
+}
+
+/*
 //TODO väntar tills vi implementerat hash table
 void test_insert_invalid(ioopm_hash_table_t *ht)
 {
@@ -59,7 +71,7 @@ void test_insert_invalid(ioopm_hash_table_t *ht)
   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key)); 
   ioopm_hash_table_insert(ht, key, value);
   //ioopm_hash_table_destroy(ht);
-}
+}*/
 
 void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
 {
@@ -67,7 +79,7 @@ void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *va
   ioopm_hash_table_t *ht = ioopm_hash_table_create();
   test_insert_once(ht);
   test_insert_twice(ht);
-  test_insert_invalid(ht);
+  //test_insert_invalid(ht);
   ioopm_hash_table_destroy(ht);
 
   //testar 1;1
@@ -84,8 +96,8 @@ void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *va
 
   //testar 3;3
   ht = ioopm_hash_table_create();
-  test_insert_invalid(ht);
-  test_insert_invalid(ht);
+  //test_insert_invalid(ht);
+  //test_insert_invalid(ht);
   ioopm_hash_table_destroy(ht);
 
   //testar 1;2
@@ -97,13 +109,13 @@ void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *va
   //testar 1;3
   ht = ioopm_hash_table_create();
   test_insert_once(ht);
-  test_insert_invalid(ht);
+  //test_insert_invalid(ht);
   ioopm_hash_table_destroy(ht);
 
   //testar 2;3
   ht = ioopm_hash_table_create();
   test_insert_twice(ht);
-  test_insert_invalid(ht);
+ //test_insert_invalid(ht);
   ioopm_hash_table_destroy(ht);
   ht = NULL;               //avrefererar pointer till NULL, dangling pointer annars. 
 }
@@ -138,7 +150,8 @@ int main() {
     //(CU_add_test(test_suite_insert, "Insert hash table once", test_insert_once) == NULL) ||
     //(CU_add_test(test_suite_insert, "Insert hash table twice", test_insert_twice) == NULL) ||
     //(CU_add_test(test_suite_insert, "Insert hash table invalid", test_insert_invalid) == NULL) ||
-    //(CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
+    (CU_add_test(test_suite_insert, "Lookup empty hash table", test_lookup_empty) == NULL) ||
+    (CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
 
   
