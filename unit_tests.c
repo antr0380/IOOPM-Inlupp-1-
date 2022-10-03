@@ -24,39 +24,50 @@ void test_create_destroy()
 
 void test_insert_once(ioopm_hash_table_t *ht)
 {
-  //ioopm_hash_table_t *ht = ioopm_hash_table_create();
   int key = 0;
   char *value = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
-  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key));
+  bool successful;
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
   ioopm_hash_table_insert(ht, key, value);
-  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value);
-  //ioopm_hash_table_destroy(ht);
+  ioopm_hash_table_lookup(ht,key, &successful);
+  CU_ASSERT_TRUE(successful);     //kollar att lookup är successful innan vi tittar om värdena är samma. 
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key, &successful), value); //FIXME returnerar NULL om lookup är false och testet blir då true
 }
 
 void test_insert_twice(ioopm_hash_table_t *ht)          
 {
-  //ioopm_hash_table_t *ht = ioopm_hash_table_create();
   int key = 0;
-  char *value1 = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
-  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key));
+  char *value1 = NULL;             
+  bool successful;
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
   ioopm_hash_table_insert(ht, key, value1);
-  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value1);
 
-  // FIXME måste ändra på det här om vi implementerar en länkad lista i bucket
+  //kollar att lookupen är successful dvs. att den hittar ett värde under key
+  ioopm_hash_table_lookup(ht,key, &successful);
+  CU_ASSERT_TRUE(successful);
+
+  //kollar att värdet vi la in är samma som värdet som ligger under key 
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key, &successful), value1);
+
+  //vi lägger in ett andra värde och kollar att insert funkar
   char *value2 = NULL;
   ioopm_hash_table_insert(ht, key, value2);
-  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key), value2);
-  //ioopm_hash_table_destroy(ht);
+  ioopm_hash_table_lookup(ht,key, &successful);
+  CU_ASSERT_TRUE(successful);
+  CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key,&successful), value2); 
 }
 
+//testar om ht är tomt. 
+//vi har lagt in dummies,
 void test_lookup_empty()
 {
    ioopm_hash_table_t *ht = ioopm_hash_table_create();
+   bool successful;
    for (int i = 0; i < 18; ++i) /// 18 is a bit magical
      {
-       CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, i));
+      CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, i, &successful));
      }
-   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, -1));
+   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, 1, &successful)); //ändrat från -1 till 1. 
    ioopm_hash_table_destroy(ht);
 }
 

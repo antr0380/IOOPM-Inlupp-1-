@@ -1,8 +1,13 @@
 #include "hash_table.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
+#define Success(v)      (option_t) { .success = true, .value = v };
+#define Failure()       (option_t) { .success = false };
+#define Successful(o)   (o.success == true)
+#define Unsuccessful(o) (o.success == false)
 
-//ska vi ha dom här 
+//ska vi ha dom här eller i h-filen?
 typedef struct entry entry_t;
 
 struct entry
@@ -17,10 +22,16 @@ struct hash_table
   entry_t *buckets[17]; //vad är det här? en array av arrays?
 };
 
+struct option
+{
+  bool success;
+  char *value;
+};
+
 //funktionssignaturer
 ioopm_hash_table_t *ioopm_hash_table_create(void);
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht);
-char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key);
+char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful);
 entry_t *find_previous_entry_for_key(entry_t *bucket, int key);
 entry_t *entry_create(int key, char *value, entry_t *next);
 void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value);
@@ -78,9 +89,24 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
   ht = NULL; //free pointer
 }
 
-char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key) //pekarsemantik eller värdesemantik?
+char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful)
 {
-  return NULL; //TODO
+  /// Find the previous entry for key
+  entry_t *tmp = find_previous_entry_for_key(ht->buckets[key % 17], key);
+  entry_t *next = tmp->next;
+
+  if (next && next->value)
+  {
+    //return Success(next->value);
+    *successful = true;
+    return next->value;
+  }
+else
+  {
+    //return Failure();
+    *successful = false;
+    return NULL; //kommer alltid vara null. ska vi bara returnera null istället för att returnera next->value?
+  }
 }
 
 //vi antar att bucketen (entries) är sorterad efter key-storlek
