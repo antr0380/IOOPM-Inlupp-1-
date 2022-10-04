@@ -6,6 +6,7 @@
 #define Failure()       (option_t) { .success = false };
 #define Successful(o)   (o.success == true)
 #define Unsuccessful(o) (o.success == false)
+#define No_Buckets 17
 
 //ska vi ha dom här eller i h-filen?
 typedef struct entry entry_t;
@@ -19,27 +20,24 @@ struct entry
 
 struct hash_table
 {
-  entry_t *buckets[17]; //vad är det här? en array av arrays?
-};
-
-struct option
-{
-  bool success;
-  char *value;
+  entry_t *buckets[No_Buckets]; //vad är det här? en array av arrays?
 };
 
 //funktionssignaturer
 ioopm_hash_table_t *ioopm_hash_table_create(void);
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht);
 char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful);
-entry_t *find_previous_entry_for_key(entry_t *bucket, int key);
-entry_t *entry_create(int key, char *value, entry_t *next);
+static entry_t *find_previous_entry_for_key(entry_t *bucket, int key);
+static entry_t *entry_create(int key, char *value, entry_t *next);
 void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value);
+char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful);
+static void create_dummies(ioopm_hash_table_t *ht);
+static void entry_destroy(entry_t *entry);
 
-void create_dummies(ioopm_hash_table_t *ht)
+
+static void create_dummies(ioopm_hash_table_t *ht)
 {
-  int ht_size = 17;
-  for (int i = 0; i < ht_size; ++i)
+  for (int i = 0; i < No_Buckets; ++i)
   {
     entry_t *dummy = entry_create(0,NULL,NULL);
     ht->buckets[i] = dummy;
@@ -55,14 +53,14 @@ ioopm_hash_table_t *ioopm_hash_table_create(void)   //type for this function is 
   return ht;
 }
 
-entry_t *entry_create(int key, char *value, entry_t *next)
+static entry_t *entry_create(int key, char *value, entry_t *next)
 {
   entry_t *entry = calloc(1, sizeof(entry_t));
   entry->key=key, entry->value=value, entry->next=next;
   return entry;
 }
 
-void entry_destroy(entry_t *entry)
+static void entry_destroy(entry_t *entry)
 {
   free(entry);
   entry = NULL;  //free pointer
@@ -73,8 +71,7 @@ void entry_destroy(entry_t *entry)
 2. Deallocate the hash table data structure using free().*/
 void ioopm_hash_table_destroy(ioopm_hash_table_t *ht) 
 {
-  int ht_size = 17; //FIXME hårdkodat bucket size 17. 
-  for(int i = 0; i < ht_size; i++) //itererar över buckets array, tar bort alla entries förutom sista
+  for(int i = 0; i < No_Buckets; i++) //itererar över buckets array, tar bort alla entries förutom sista
   {
     entry_t *entry = ht->buckets[i]; 
     while(entry->next != NULL) //itererar över entries i bucket
@@ -92,10 +89,10 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
 char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful)
 {
   /// Find the previous entry for key
-  entry_t *tmp = find_previous_entry_for_key(ht->buckets[key % 17], key);
+  entry_t *tmp = find_previous_entry_for_key(ht->buckets[abs(key % No_Buckets)], key); //ändrat så att negativa keys ändrar tecken till positiva. -1 blir 1. 
   entry_t *next = tmp->next;
 
-  if (next && next->value)
+  if (next && next->value) //ska man inte kunna ha nullvärden?
   {
     //return Success(next->value);
     *successful = true;
@@ -110,7 +107,7 @@ else
 }
 
 //vi antar att bucketen (entries) är sorterad efter key-storlek
-entry_t *find_previous_entry_for_key(entry_t *first_entry, int key)
+static entry_t *find_previous_entry_for_key(entry_t *first_entry, int key)
 {
   if(first_entry->next == NULL)
   {
@@ -130,7 +127,7 @@ entry_t *find_previous_entry_for_key(entry_t *first_entry, int key)
 void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value)
 {
   /// Calculate the bucket for this entry
-  int bucket = key % 17;
+  int bucket = abs(key % No_Buckets);
   /// Search for an existing entry for a key
   entry_t *entry = find_previous_entry_for_key(ht->buckets[bucket], key);
   entry_t *next = entry->next;
@@ -144,5 +141,28 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value)
     {
       entry->next = entry_create(key, value, next);
     }
+}
+
+char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful)
+{
+  //använd lookup för att kolla om entry existerar i key. 
+  bool successful_lookup; //gav inte det här segfault?
+  ioopm_hash_table_lookup(ht, key, &successful_lookup);
+  if(successful_lookup)
+  {
+    entry_t *first_entry = ht->buckets[abs(key % No_Buckets)]; //så vi måste inte säga att det är en int?
+    entry_t *previous_entry = find_previous_entry_for_key(first_entry, key); //tar emot första entryt i bucketen
+    entry_t *entry = previous_entry->next;
+    char *value = entry->value;
+    previous_entry->next = entry->next;
+    entry_destroy(entry);
+    *successful = true;
+    return value;
+  }
+  else
+  {
+    *successful = false;
+    return NULL; 
+  }
 }
 

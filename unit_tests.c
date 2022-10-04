@@ -25,9 +25,9 @@ void test_create_destroy()
 void test_insert_once(ioopm_hash_table_t *ht)
 {
   int key = 0;
-  char *value = NULL;             //works because ioopm_hash_table_lookup returns NULL (stub)
+  char *value = " ";             //changed the value to "" from NULL
   bool successful;
-  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
+  //CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
   ioopm_hash_table_insert(ht, key, value);
   ioopm_hash_table_lookup(ht,key, &successful);
   CU_ASSERT_TRUE(successful);     //kollar att lookup är successful innan vi tittar om värdena är samma. 
@@ -36,10 +36,10 @@ void test_insert_once(ioopm_hash_table_t *ht)
 
 void test_insert_twice(ioopm_hash_table_t *ht)          
 {
-  int key = 0;
-  char *value1 = NULL;             
+  int key = 1;
+  char *value1 = " ";          //changed the value to "" from NULL     
   bool successful;
-  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
+  //CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
   ioopm_hash_table_insert(ht, key, value1);
 
   //kollar att lookupen är successful dvs. att den hittar ett värde under key
@@ -50,7 +50,7 @@ void test_insert_twice(ioopm_hash_table_t *ht)
   CU_ASSERT_EQUAL(ioopm_hash_table_lookup(ht,key, &successful), value1);
 
   //vi lägger in ett andra värde och kollar att insert funkar
-  char *value2 = NULL;
+  char *value2 = " ";
   ioopm_hash_table_insert(ht, key, value2);
   ioopm_hash_table_lookup(ht,key, &successful);
   CU_ASSERT_TRUE(successful);
@@ -67,8 +67,31 @@ void test_lookup_empty()
      {
       CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, i, &successful));
      }
-   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, 1, &successful)); //ändrat från -1 till 1. 
+   CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, -1, &successful)); //ändrat från -1 till 1. 
    ioopm_hash_table_destroy(ht);
+}
+
+void test_remove_inserted_entry()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 5;
+  char *value = "hej";
+  bool successful;
+  ioopm_hash_table_insert(ht, key, value);
+  ioopm_hash_table_remove(ht, key, &successful);
+  CU_ASSERT_TRUE(successful);
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, key, &successful));
+  ioopm_hash_table_destroy(ht);
+}
+
+void test_remove_not_inserted_entry()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 5;
+  bool successful;
+  ioopm_hash_table_remove(ht, key, &successful);
+  CU_ASSERT_FALSE(successful);
+  ioopm_hash_table_destroy(ht);
 }
 
 /*
@@ -163,6 +186,8 @@ int main() {
     //(CU_add_test(test_suite_insert, "Insert hash table invalid", test_insert_invalid) == NULL) ||
     (CU_add_test(test_suite_insert, "Lookup empty hash table", test_lookup_empty) == NULL) ||
     (CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
+    (CU_add_test(test_suite_insert, "Remove inserted entry in hash table", test_remove_inserted_entry) == NULL) ||
+    (CU_add_test(test_suite_insert, "Remove not inserted entry in hash table", test_remove_not_inserted_entry) == NULL) ||
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
 
   

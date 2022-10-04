@@ -15,7 +15,6 @@
  */
 
 typedef struct hash_table ioopm_hash_table_t;
-typedef struct option option_t;
 
 /// @brief Create a new hash table
 /// @return A new empty hash table
@@ -41,4 +40,4 @@ char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful)
 /// @param ht hash table operated upon
 /// @param key key to remove
 /// @return the value mapped to by key (FIXME: incomplete)
-char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key);
+char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful);
