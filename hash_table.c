@@ -33,6 +33,8 @@ void ioopm_hash_table_insert(ioopm_hash_table_t *ht, int key, char *value);
 char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful);
 static void create_dummies(ioopm_hash_table_t *ht);
 static void entry_destroy(entry_t *entry);
+int ioopm_hash_table_size(ioopm_hash_table_t *ht);
+bool ioopm_hash_table_is_empty(ioopm_hash_table_t *ht);
 
 
 static void create_dummies(ioopm_hash_table_t *ht)
@@ -76,7 +78,7 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
     entry_t *entry = ht->buckets[i]; 
     while(entry->next != NULL) //itererar över entries i bucket
     {
-      entry_t *entry_temp = entry; //alias eller kopia?
+      entry_t *entry_temp = entry; 
       entry = entry->next;
       entry_destroy(entry_temp);
     }
@@ -175,3 +177,52 @@ char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful)
   }
 }
 
+//Räknar med dummy och alla element utom det sista. 
+int ioopm_hash_table_size(ioopm_hash_table_t *ht)
+{
+  int counter = 0;
+  //loop för att iterera över alla buckets
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *entry = ht->buckets[i]; //entry = dummy
+    //räkna varje entry i bucketen dvs inkrementera räknaren (exkludera dummy).
+    while(entry->next != NULL) 
+    {
+      counter++;
+      entry = entry->next;
+    }
+  }
+  return counter;
+}
+
+bool ioopm_hash_table_is_empty(ioopm_hash_table_t *ht)
+{
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *dummy = ht->buckets[i];
+    if(dummy->next != NULL)
+    {
+      return false;
+    } 
+  }
+  return true;
+}
+
+void ioopm_hash_table_clear(ioopm_hash_table_t *ht)
+{
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *dummy = ht->buckets[i]; 
+    if (dummy->next != NULL )
+    {
+      entry_t *entry = dummy->next;
+      while(entry->next != NULL)
+      {
+        entry_t *entry_temp = entry; 
+        entry = entry->next;
+        entry_destroy(entry_temp);
+      }
+      entry_destroy(entry);
+    }
+  }
+}
