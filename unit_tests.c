@@ -94,6 +94,28 @@ void test_remove_not_inserted_entry()
   ioopm_hash_table_destroy(ht);
 }
 
+void test_remove_last_and_second_last_entry()
+{
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  bool successful;
+  char *value = " ";
+  ioopm_hash_table_insert(ht, (int) 17, value); //NULL-värden på values gav inte ett segfault. 
+  ioopm_hash_table_insert(ht, (int) 34, value);
+
+  ioopm_hash_table_remove(ht, 17, &successful);
+  CU_ASSERT_TRUE(successful);
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, 17, &successful));
+  CU_ASSERT_FALSE(successful);
+
+  ioopm_hash_table_remove(ht, 34, &successful);
+  CU_ASSERT_TRUE(successful);
+  CU_ASSERT_PTR_NULL(ioopm_hash_table_lookup(ht, 34, &successful));
+  CU_ASSERT_FALSE(successful);
+
+  ioopm_hash_table_destroy(ht);
+}
+
+
 /*
 //TODO väntar tills vi implementerat hash table
 void test_insert_invalid(ioopm_hash_table_t *ht)
@@ -188,6 +210,7 @@ int main() {
     (CU_add_test(test_suite_insert, "Insert hash table ALL", ioopm_hash_table_insert_test) == NULL) ||
     (CU_add_test(test_suite_insert, "Remove inserted entry in hash table", test_remove_inserted_entry) == NULL) ||
     (CU_add_test(test_suite_insert, "Remove not inserted entry in hash table", test_remove_not_inserted_entry) == NULL) ||
+    (CU_add_test(test_suite_insert, "Remove last and next to last entry", test_remove_last_and_second_last_entry) == NULL) ||
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
 
   

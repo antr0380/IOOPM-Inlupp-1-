@@ -88,21 +88,26 @@ void ioopm_hash_table_destroy(ioopm_hash_table_t *ht)
 
 char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful)
 {
-  /// Find the previous entry for key
   entry_t *tmp = find_previous_entry_for_key(ht->buckets[abs(key % No_Buckets)], key); //ändrat så att negativa keys ändrar tecken till positiva. -1 blir 1. 
   entry_t *next = tmp->next;
 
-  if (next && next->value) //ska man inte kunna ha nullvärden?
+  if (next) //tidigare: if (next && next->value) 
   {
-    //return Success(next->value);
-    *successful = true;
-    return next->value;
+    if(next->key == key)
+    {
+      *successful = true;
+      return next->value;      //Ful kod. 
+    }
+    else
+    {    
+      *successful = false;
+      return NULL; 
+    }
   }
-else
+  else
   {
-    //return Failure();
     *successful = false;
-    return NULL; //kommer alltid vara null. ska vi bara returnera null istället för att returnera next->value?
+    return NULL; 
   }
 }
 
@@ -116,9 +121,13 @@ static entry_t *find_previous_entry_for_key(entry_t *first_entry, int key)
   else //gå igenom entries tills vi hittar att någon key1 är större eller lika med vår key. vi kollar next
   {
     entry_t *entry = first_entry;
-    while(key < entry->next->key) 
+    while(entry->next->key < key)  //vad händer om next är NULL? Segfault. För någonting som ligger sist. lookup 34. 
     {
       entry = entry->next;
+      if (entry->next == NULL) //sista entry
+      {
+        return entry;
+      }
     }
     return entry;  
   }
