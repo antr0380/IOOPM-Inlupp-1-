@@ -165,6 +165,47 @@ void test_ht_clear()
   ioopm_hash_table_destroy(ht);
 }
 
+/*
+1. Create an array keys of N integers and fill it with some keys (e.g. int keys[5] = {3, 10, 42, 0, 99}).
+2. Create another array found of N booleans, all initialized to false (e.g. boolean found[5] = {false})
+3. Insert all the keys from keys into a fresh hash table (the values are not important).
+4. Call ioopm_hash_table_keys() on the hash table and iterate over the resulting array
+    4.1. For each key, find the corresponding index of the key in keys and set that index to true in found.
+    4.2. If you find a key that is not among the original keys, you can register a failed assertion by calling CU_FAIL("Found a key that was never inserted!")
+5. Finally, iterate over found and assert that every element is now true. */
+
+void test_get_all_keys_ht()
+{
+  int keys[5] = {3, 10, 42, 0, 99};
+  bool found[5] = {false};
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  for(int i = 0; i < 5; i++)
+  {
+    int key = keys[i];
+    ioopm_hash_table_insert(ht, key, NULL);
+  }
+  int *retreived_keys = ioopm_hash_table_keys(ht);
+  int size = ioopm_hash_table_size(ht); //man kan också göra int size = sizeof(arr)/sizeof(arr[0]);  sättet som vi gör på förutsätter att ioopm_hash_table_keys typ funkar som den ska?
+  for(int i = 0; i < size; i++)
+  {
+    int key = retrieved_keys[i];
+    bool found_key = false;
+    for(int i = 0; i < 5; i++)
+    {
+      if (key == keys[i])
+      {
+        found[i] = true;
+        found_key = true;
+      }
+    }
+    if(!found_key)
+    {
+      CU_FAIL("Found a key that was never inserted!");
+    }
+  }
+}
+
+
 void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
 {
   //testar 1;2;3

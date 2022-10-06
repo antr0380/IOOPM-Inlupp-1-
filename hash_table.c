@@ -215,14 +215,28 @@ void ioopm_hash_table_clear(ioopm_hash_table_t *ht)
     entry_t *dummy = ht->buckets[i]; 
     if (dummy->next != NULL )
     {
-      entry_t *entry = dummy->next;
+      entry_t *entry = dummy->next; 
       while(entry->next != NULL)
       {
         entry_t *entry_temp = entry; 
         entry = entry->next;
-        entry_destroy(entry_temp);
+        bool successful;
+        ioopm_hash_table_remove(ht, entry_temp->key, &successful);  //behövs för att ta bort pointer till entry, dummy t.ex
       }
-      entry_destroy(entry);
+      bool successful;
+      ioopm_hash_table_remove(ht, entry->key, &successful);
     }
   }
+}
+
+int *ioopm_hash_table_keys(ioopm_hash_table_t *ht)
+{
+  int result[] = {1};
+  return result;
+}
+
+char **ioopm_hash_table_values(ioopm_hash_table_t *ht)
+{
+  char *result[] = {" "};
+  return result;
 }
