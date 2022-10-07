@@ -1,5 +1,7 @@
 #include <CUnit/Basic.h>
 #include "hash_table.h"
+#include <stdlib.h>
+#include <string.h>
 
 int init_suite(void) {
   return 0;
@@ -177,14 +179,14 @@ void test_ht_clear()
 void test_get_all_keys_ht()
 {
   int keys[5] = {3, 10, 42, 0, 99};
-  bool found[5] = {false};
+  bool found[5] = {false};           
   ioopm_hash_table_t *ht = ioopm_hash_table_create();
   for(int i = 0; i < 5; i++)
   {
     int key = keys[i];
     ioopm_hash_table_insert(ht, key, NULL);
   }
-  int *retreived_keys = ioopm_hash_table_keys(ht);
+  int *retrieved_keys = ioopm_hash_table_keys(ht);
   int size = ioopm_hash_table_size(ht); //man kan också göra int size = sizeof(arr)/sizeof(arr[0]);  sättet som vi gör på förutsätter att ioopm_hash_table_keys typ funkar som den ska?
   for(int i = 0; i < size; i++)
   {
@@ -203,8 +205,130 @@ void test_get_all_keys_ht()
       CU_FAIL("Found a key that was never inserted!");
     }
   }
+  for(int i = 0; i < 5; ++i)
+  {
+    CU_ASSERT_TRUE(found[i]);
+  }
+  free(retrieved_keys);
+  retrieved_keys = NULL;
+  ioopm_hash_table_destroy(ht);
 }
 
+void test_get_all_values_ht()
+{
+  char *values[5] = {"three", "ten", "fortytwo", "zero", "ninetynine"};
+  bool found[5] = {false};           
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  for(int i = 0; i < 5; i++)
+  {
+    char *value = values[i];
+    ioopm_hash_table_insert(ht, i, value);
+  }
+  char **retrieved_values = ioopm_hash_table_values(ht);
+  int size = ioopm_hash_table_size(ht); //man kan också göra int size = sizeof(arr)/sizeof(arr[0]);  sättet som vi gör på förutsätter att ioopm_hash_table_keys typ funkar som den ska?
+  for(int i = 0; i < size; i++)
+  {
+    char *value = retrieved_values[i];
+    bool found_value = false;
+    for(int i = 0; i < 5; i++)
+    {
+      if (value == values[i])
+      {
+        found[i] = true;
+        found_value = true;
+      }
+    }
+    if(!found_value)
+    {
+      CU_FAIL("Found a value that was never inserted!");
+    }
+  }
+  for(int i = 0; i < 5; ++i)
+  {
+    CU_ASSERT_TRUE(found[i]);
+  }
+  free(retrieved_values);
+  retrieved_values = NULL;
+  ioopm_hash_table_destroy(ht);
+}
+
+/*1. Create an array keys of N integers and fill it with some keys (e.g. int keys[5] = {3, 10, 42, 0, 99}).
+2. Create another array values of N strings (e.g. char *values[5] = {"three", "ten", "fortytwo", "zero", "ninetynine"}).
+3. Insert all the keys from keys into a fresh hash table with values from the corresponding indices in values.
+4. Call ioopm_hash_table_keys() and ioopm_hash_table_values() on the hash table and iterate over the two resulting arrays.
+    4.1. For each key k and value v at the same index i, find the corresponding index j of k in keys and assert that v is equal to values[j].
+    4.2. If you find a key (or value) that is not among the original keys (or values), you can register a failed assertion by calling CU_FAIL("Found a ... that was never inserted!").*/
+
+void test_corresponding_keys_values_ht()
+{
+  int keys[5] = {3, 10, 42, 0, 99};
+  char *values[5] = {"three", "ten", "fortytwo", "zero", "ninetynine"};
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  for(int i = 0; i < 5; i++)
+  {
+    char *value = values[i];
+    int key = keys[i];
+    ioopm_hash_table_insert(ht, key, value);
+  }
+  char **retrieved_values = ioopm_hash_table_values(ht);
+  int *retrieved_keys = ioopm_hash_table_keys(ht);
+  for(int i = 0; i < 5; i++)
+  {
+    int k = retrieved_keys[i];
+    char *v = retrieved_values[i];
+    bool found_match;
+    for(int i = 0; i < 5; ++i)
+    {
+      if(k == keys[i])
+      {
+        int j = i;
+        CU_ASSERT_EQUAL(v, values[j]);
+        found_match = true;
+      }
+    }
+    if(!found_match)
+    {
+      CU_FAIL("Found a value that was never inserted!");
+    }
+  }
+  free(retrieved_keys);
+  free(retrieved_values);
+  retrieved_keys = NULL;
+  retrieved_values = NULL;
+  ioopm_hash_table_destroy(ht);
+}
+
+//test en key som existerar och en key som inte existerar 
+void test_key_exists_ht()
+{
+  //test a key that exists 
+  int key = 0;
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  ioopm_hash_table_insert(ht, key, NULL);
+  CU_ASSERT_TRUE(ioopm_hash_table_has_key(ht, key));
+
+  //test a key that does not exist
+  key = 1;
+  CU_ASSERT_FALSE(ioopm_hash_table_has_key(ht, key));
+
+  ioopm_hash_table_destroy(ht);
+}
+
+//testa en value som existerar och en value som inte existerar
+void test_value_exists_ht()
+{
+  //test that a value that exists 
+  char *value = " ";
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  ioopm_hash_table_insert(ht, 1, value);
+  CU_ASSERT_TRUE(ioopm_hash_table_has_value(ht, value));
+
+  //test that a value that does not exist
+  value = "hej";
+  CU_ASSERT_FALSE(ioopm_hash_table_has_value(ht, value));
+
+  ioopm_hash_table_destroy(ht);
+}
 
 void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
 {
@@ -299,9 +423,13 @@ int main() {
     (CU_add_test(test_suite_size, "Size of hash table with several entries", test_several_entries_ht_size) == NULL) ||
     (CU_add_test(test_suite_size, "Check if hash table is empty after insertion and without", test_ht_empty) == NULL) ||
     (CU_add_test(test_suite_size, "Clear hash table", test_ht_clear) == NULL) ||
+    (CU_add_test(test_suite_size, "Test keys in hash table", test_get_all_keys_ht) == NULL) ||
+    (CU_add_test(test_suite_size, "Test values in hash table", test_get_all_values_ht) == NULL) ||
+    (CU_add_test(test_suite_size, "Test corresponding keys and values in hash table", test_corresponding_keys_values_ht) == NULL) ||
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
-
-  
+    (CU_add_test(test_suite_size, "Test key exists", test_key_exists_ht) == NULL) || 
+    (CU_add_test(test_suite_size, "Test value exists", test_value_exists_ht) == NULL) || 
+    
     0
     )
     {

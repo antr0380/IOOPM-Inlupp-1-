@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #define Success(v)      (option_t) { .success = true, .value = v };
 #define Failure()       (option_t) { .success = false };
 #define Successful(o)   (o.success == true)
@@ -231,12 +232,70 @@ void ioopm_hash_table_clear(ioopm_hash_table_t *ht)
 
 int *ioopm_hash_table_keys(ioopm_hash_table_t *ht)
 {
-  int result[] = {1};
-  return result;
+  size_t ht_size = ioopm_hash_table_size(ht);
+  int *array = calloc(ht_size, sizeof(int));
+  int index = 0;
+  //loop för att iterera över alla buckets
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *entry = ht->buckets[i]; //entry = dummy
+    //räkna varje entry i bucketen dvs inkrementera räknaren (exkludera dummy).
+    while(entry->next != NULL) 
+    {
+      entry = entry->next;
+      array[index] = entry->key;
+      index++;
+    }
+  }
+  return array;
 }
 
 char **ioopm_hash_table_values(ioopm_hash_table_t *ht)
 {
-  char *result[] = {" "};
-  return result;
+  size_t ht_size = ioopm_hash_table_size(ht);
+  char **array = calloc(ht_size, sizeof(char *));
+  int index = 0;
+  //loop för att iterera över alla buckets
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *entry = ht->buckets[i]; //entry = dummy
+    //räkna varje entry i bucketen dvs inkrementera räknaren (exkludera dummy).
+    while(entry->next != NULL) 
+    {
+      entry = entry->next;
+      array[index] = entry->value;
+      index++;
+    }
+  }
+  return array;
+}
+
+bool ioopm_hash_table_has_key(ioopm_hash_table_t *ht, int key)
+{
+  bool successful;
+  ioopm_hash_table_lookup(ht, key, &successful);
+  return successful; 
+}
+
+bool ioopm_hash_table_has_value(ioopm_hash_table_t *ht, char *value)
+{
+  //loop för att iterera över alla buckets
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *entry = ht->buckets[i]; //entry = dummy
+    //räkna varje entry i bucketen dvs inkrementera räknaren (exkludera dummy).
+    while(entry->next != NULL) 
+    {
+      if(entry->next->value != NULL) //testar för NULL-värden så att det inte blir fel med strcmp
+      {
+        int equal = strcmp(entry->next->value, value); //blir 0 om equal. får inte ta emot NULL-värden
+        if (equal == 0)
+        {
+          return true;
+        }
+      }
+    entry = entry->next;
+    }
+  }
+  return false;
 }

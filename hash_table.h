@@ -1,5 +1,6 @@
 #pragma once
 #include <stdbool.h>
+#include <string.h>
 
 /**
  * @file hash_table.h
@@ -41,7 +42,6 @@ char *ioopm_hash_table_lookup(ioopm_hash_table_t *ht, int key, bool *successful)
 /// @param key key to remove
 /// @return the value mapped to by key and change of pointer
 char *ioopm_hash_table_remove(ioopm_hash_table_t *ht, int key, bool *successful);
-
 
 
 /// @brief returns the number of key => value entries in the hash table
