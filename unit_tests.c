@@ -314,20 +314,50 @@ void test_key_exists_ht()
   ioopm_hash_table_destroy(ht);
 }
 
+//Write tests for both functions (or one at a time if you want to interleave testing and implementation). When testing ioopm_hash_table_has_value(), 
+//test using both the identical string (the same string) and the equivalent string (i.e., an unmodified copy of the original). 
+//Use a function like strdup() to create a copy of a string. (Don’t forget to deallocate the copy or Valgrind will complain.)
+
 //testa en value som existerar och en value som inte existerar
 void test_value_exists_ht()
 {
-  //test that a value that exists 
+  //test that a value exists (identical string)
   char *value = " ";
   ioopm_hash_table_t *ht = ioopm_hash_table_create();
   ioopm_hash_table_insert(ht, 1, value);
   CU_ASSERT_TRUE(ioopm_hash_table_has_value(ht, value));
 
-  //test that a value that does not exist
+  //test that a copy of the value exists (equivalent string)
+  char *copy = strdup(value);
+  ioopm_hash_table_insert(ht, 1, copy);
+  CU_ASSERT_TRUE(ioopm_hash_table_has_value(ht, value));
+
+  //test a value that does not exist
   value = "hej";
   CU_ASSERT_FALSE(ioopm_hash_table_has_value(ht, value));
 
+  free(copy);
+  copy = NULL;
   ioopm_hash_table_destroy(ht);
+}
+
+void ioopm_hash_table_all_test()
+{
+  //bool ioopm_hash_table_all(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg)
+  //typedef bool(*ioopm_predicate)(int key, char *value, void *extra);   kollar vårt villkor
+  //bool key_equiv(int key, char *value_ignored, void *x)
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  int key = 1;  
+  ioopm_hash_table_insert(ht, key, NULL);
+  CU_ASSERT_TRUE(ioopm_hash_table_all(ht, key_equiv, &key)); //testar om alla keys i ht är 1. 
+  ioopm_hash_table_insert(ht, 5, NULL);
+  CU_ASSERT_FALSE(ioopm_hash_table_all(ht, key_equiv, &key)); //testar om alla keys i ht är 1. 
+  ioopm_hash_table_destroy(ht);
+}
+
+void ioopm_hash_table_apply_to_all_test()
+{
+  
 }
 
 void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
@@ -429,6 +459,7 @@ int main() {
     (CU_add_test(my_test_suite, "Destroy hash table", test_create_destroy) == NULL) || 
     (CU_add_test(test_suite_size, "Test key exists", test_key_exists_ht) == NULL) || 
     (CU_add_test(test_suite_size, "Test value exists", test_value_exists_ht) == NULL) || 
+    (CU_add_test(test_suite_size, "All test", ioopm_hash_table_all_test) == NULL) || 
     
     0
     )

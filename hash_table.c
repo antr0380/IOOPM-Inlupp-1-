@@ -8,6 +8,7 @@
 #define Successful(o)   (o.success == true)
 #define Unsuccessful(o) (o.success == false)
 #define No_Buckets 17
+#define _XOPEN_SOURCE 700
 
 //ska vi ha dom här eller i h-filen?
 typedef struct entry entry_t;
@@ -36,7 +37,10 @@ static void create_dummies(ioopm_hash_table_t *ht);
 static void entry_destroy(entry_t *entry);
 int ioopm_hash_table_size(ioopm_hash_table_t *ht);
 bool ioopm_hash_table_is_empty(ioopm_hash_table_t *ht);
-
+void ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, ioopm_apply_function apply_fun, void *arg);
+bool ioopm_hash_table_any(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg);
+bool ioopm_hash_table_all(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg);
+bool key_equiv(int key, char *value_ignored, void *x); //TODO Lägg till static när testerna har körts
 
 static void create_dummies(ioopm_hash_table_t *ht)
 {
@@ -298,4 +302,26 @@ bool ioopm_hash_table_has_value(ioopm_hash_table_t *ht, char *value)
     }
   }
   return false;
+}
+
+bool key_equiv(int key, char *value_ignored, void *x) // TODO lägg till static när testerna har körts
+{
+  int *other_key_ptr = x;
+  int other_key = *other_key_ptr;
+  return key == other_key;
+}
+
+bool ioopm_hash_table_all(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg)
+{
+  return true;
+}
+
+bool ioopm_hash_table_any(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg)
+{
+  return true;
+}
+
+void ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, ioopm_apply_function apply_fun, void *arg)
+{
+  return;
 }
