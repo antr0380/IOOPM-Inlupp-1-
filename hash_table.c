@@ -41,6 +41,9 @@ void ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, ioopm_apply_function 
 bool ioopm_hash_table_any(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg);
 bool ioopm_hash_table_all(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg);
 bool key_equiv(int key, char *value_ignored, void *x); //TODO Lägg till static när testerna har körts
+bool check_values_null(int key, char *value, void *extra_ignored);
+void apply_values_to_empty(int key, char **value, void *extra_ignored); //change the return type to something, not void. 
+bool value_equiv(int key_ignored, char *value, void *x);
 
 static void create_dummies(ioopm_hash_table_t *ht)
 {
@@ -274,54 +277,100 @@ char **ioopm_hash_table_values(ioopm_hash_table_t *ht)
   return array;
 }
 
-bool ioopm_hash_table_has_key(ioopm_hash_table_t *ht, int key)
+bool ioopm_hash_table_has_key(ioopm_hash_table_t *ht, int key) 
 {
-  bool successful;
-  ioopm_hash_table_lookup(ht, key, &successful);
-  return successful; 
+  return ioopm_hash_table_any(ht, key_equiv, &key); 
 }
 
 bool ioopm_hash_table_has_value(ioopm_hash_table_t *ht, char *value)
 {
-  //loop för att iterera över alla buckets
-  for(int i = 0; i < No_Buckets; i++)
+  return ioopm_hash_table_any(ht, value_equiv, &value); 
+}
+
+bool value_equiv(int key_ignored, char *value, void *x) 
+{
+  char **other_value_ptr = x;
+  char *other_value = *other_value_ptr;
+  int equal = strcmp(other_value, value);
+  if (equal == 0)
   {
-    entry_t *entry = ht->buckets[i]; //entry = dummy
-    //räkna varje entry i bucketen dvs inkrementera räknaren (exkludera dummy).
-    while(entry->next != NULL) 
-    {
-      if(entry->next->value != NULL) //testar för NULL-värden så att det inte blir fel med strcmp
-      {
-        int equal = strcmp(entry->next->value, value); //blir 0 om equal. får inte ta emot NULL-värden
-        if (equal == 0)
-        {
-          return true;
-        }
-      }
-    entry = entry->next;
-    }
+    return true;
   }
   return false;
 }
 
-bool key_equiv(int key, char *value_ignored, void *x) // TODO lägg till static när testerna har körts
+bool key_equiv(int key, char *value_ignored, void *x)
 {
   int *other_key_ptr = x;
   int other_key = *other_key_ptr;
   return key == other_key;
 }
 
+void apply_values_to_empty(int key, char **value, void *extra_ignored)
+{
+  *value = " "; 
+}
+
+bool check_values_null(int key, char *value, void *extra_ignored)
+{
+  int result = strcmp(value, " ");
+  if (result == 0)
+  {
+    return true;
+  }
+  return false;
+}
+
 bool ioopm_hash_table_all(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg)
 {
-  return true;
+  int size = ioopm_hash_table_size(ht);
+  int *keys = ioopm_hash_table_keys(ht);
+  char **values = ioopm_hash_table_values(ht);
+  bool result = true;
+  for (int i = 0; i < size && result; ++i)
+  {
+    result = pred(keys[i], values[i], arg); //varför result &&?
+  }
+  free(keys);
+  free(values);
+  return result;
 }
 
 bool ioopm_hash_table_any(ioopm_hash_table_t *ht, ioopm_predicate pred, void *arg)
 {
-  return true;
+  int size = ioopm_hash_table_size(ht);
+  int *keys = ioopm_hash_table_keys(ht);
+  char **values = ioopm_hash_table_values(ht);
+  bool result = false;
+  for (int i = 0; i < size; ++i)
+  {
+    result = pred(keys[i], values[i], arg); //varför result &&?
+    if (result == true)
+    {
+      free(keys);
+      free(values);
+      return true;
+    }
+  }
+  free(keys);
+  free(values);
+  return result;
 }
 
 void ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, ioopm_apply_function apply_fun, void *arg)
 {
-  return;
+  int *keys = ioopm_hash_table_keys(ht);
+  char **values = ioopm_hash_table_values(ht);
+  for(int i = 0; i < No_Buckets; i++)
+  {
+    entry_t *entry = ht->buckets[i]; //entry = dummy
+    while(entry->next != NULL) 
+    {
+      entry = entry->next;
+      apply_fun(entry->key, &entry->value, arg);
+    }
+  }
+  free(keys);
+  free(values);
 }
+

@@ -17,7 +17,7 @@
 
 typedef struct hash_table ioopm_hash_table_t;
 typedef bool(*ioopm_predicate)(int key, char *value, void *extra);
-typedef void(*ioopm_apply_function)(int key, char *value, void *extra); //TODO byt till char ** senare
+typedef void(*ioopm_apply_function)(int key, char **value, void *extra);
 
 /// @brief Create a new hash table
 /// @return A new empty hash table
@@ -99,3 +99,9 @@ bool ioopm_hash_table_any(ioopm_hash_table_t *ht, ioopm_predicate pred, void *ar
 void ioopm_hash_table_apply_to_all(ioopm_hash_table_t *ht, ioopm_apply_function apply_fun, void *arg);
 
 bool key_equiv(int key, char *value_ignored, void *x);
+
+bool check_values_null(int key, char *value, void *extra_ignored);
+
+void apply_values_to_empty(int key, char **value, void *extra_ignored);
+
+bool value_equiv(int key_ignored, char *value, void *x);

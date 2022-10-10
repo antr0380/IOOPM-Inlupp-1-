@@ -357,7 +357,13 @@ void ioopm_hash_table_all_test()
 
 void ioopm_hash_table_apply_to_all_test()
 {
-  
+  ioopm_hash_table_t *ht = ioopm_hash_table_create();
+  ioopm_hash_table_insert(ht, 3, "Hello");
+  ioopm_hash_table_insert(ht, 0, "Hej");
+  char *value = " ";
+  ioopm_hash_table_apply_to_all(ht, apply_values_to_empty, &value);
+  CU_ASSERT_TRUE(ioopm_hash_table_all(ht, check_values_null, value));
+  ioopm_hash_table_destroy(ht);
 }
 
 void ioopm_hash_table_insert_test() //(ioopm_hash_table_t *ht, int key, char *value) 
@@ -460,6 +466,7 @@ int main() {
     (CU_add_test(test_suite_size, "Test key exists", test_key_exists_ht) == NULL) || 
     (CU_add_test(test_suite_size, "Test value exists", test_value_exists_ht) == NULL) || 
     (CU_add_test(test_suite_size, "All test", ioopm_hash_table_all_test) == NULL) || 
+    (CU_add_test(test_suite_size, "Apply to all test", ioopm_hash_table_apply_to_all_test) == NULL) || 
     
     0
     )
